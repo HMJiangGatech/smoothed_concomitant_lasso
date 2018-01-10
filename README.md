@@ -67,7 +67,7 @@ print(sigma)
 print("hatsigma for SC")
 print(sigmas[0])
 
-print()"hatsigma for SBvG")
+print("hatsigma for SBvG")
 print(sigmas_SBvG[0])
 
 # Beta performance
@@ -79,6 +79,41 @@ print(np.linalg.norm(true_beta - betas_SBvG[0]) / n_features)
 ```
 
 ![Simple Illustration of SC ](test_SC.png)
+
+##Example CMR
+
+```python
+import numpy as np
+import matplotlib.pyplot as plt
+from smoothed_concomitant import SC_path
+from SBvG import SBvG_path
+from data_generation import generate_data_cmr
+
+# Generate dataset
+
+n_samples = 100
+n_features = 100
+n_response = 3
+sigma = 2
+sparsity = 0.9
+snr = 1
+correlation = 0.5
+random_state = 42
+
+X, y, true_beta, true_sigma = generate_data_cmr(n_samples, n_features, n_response, sigma, snr,
+                                            sparsity, correlation,
+                                            random_state=random_state)
+
+# regularization parameter for sigma estimation
+sigma_0 = (np.linalg.norm(y) / np.sqrt(n_samples)) * 1e-2
+sigstar = max(sigma_0, np.linalg.norm(y) / np.sqrt(n_samples))
+lambda_max = np.linalg.norm(np.dot(X.T, y), ord=np.inf) / (n_samples * sigstar)
+
+# SC
+betas, sigmas, gaps, n_iters = SC_path(X, y, [lambda_max / 1.5],
+                                       eps=1e-4, max_iter=5000)
+
+```
 
 
 ## Installation & Requirements
